@@ -11,13 +11,17 @@
     }
   </style>
 </head>
-<body class="flex items-center justify-center h-full bg-gray-100">
+<body class="flex flex-col items-center justify-center h-full bg-gray-100">
+  <button id="startAudio" class="mb-4 px-6 py-3 bg-green-500 text-white text-xl font-semibold rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75">
+    Start Audio
+  </button>
   <button id="playHelicopter" class="px-6 py-3 bg-blue-500 text-white text-xl font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75">
     Miky McPhantom
   </button>
 
   <script>
-    const button = document.getElementById('playHelicopter');
+    const startAudioButton = document.getElementById('startAudio');
+    const playHelicopterButton = document.getElementById('playHelicopter');
     let audioContext;
     let bufferSource;
     let isPlaying = false;
@@ -47,7 +51,15 @@
       }
     }
 
-    button.addEventListener('click', playHelicopterSound);
+    function startAudio() {
+      if (audioContext.state === 'suspended') {
+        audioContext.resume();
+      }
+      startAudioButton.style.display = 'none';
+    }
+
+    startAudioButton.addEventListener('click', startAudio);
+    playHelicopterButton.addEventListener('click', playHelicopterSound);
   </script>
 </body>
 </html>
