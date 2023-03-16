@@ -1,1 +1,3 @@
-# micky_mcphantom
+# Tribute to Micky McPhantom
+
+The best helicopter sound.
