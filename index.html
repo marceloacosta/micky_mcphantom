@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Realistic Helicopter Sound</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    html, body {
+      height: 100%;
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center h-full bg-gray-100">
+  <button id="playHelicopter" class="px-6 py-3 bg-blue-500 text-white text-xl font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75">
+    Miky McPhantom
+  </button>
+
+  <script>
+        const button = document.getElementById('playHelicopter');
+
+    let audioContext;
+    let mainRotorOsc;
+    let tailRotorOsc;
+    let noiseFilter;
+    let mainRotorGain;
+    let tailRotorGain;
+    let noiseGain;
+    let isPlaying = false;
+
+    function createHelicopterSound() {
+      if (!isPlaying) {
+        isPlaying = true;
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        mainRotorOsc = audioContext.createOscillator();
+        tailRotorOsc = audioContext.createOscillator();
+        const noiseSource = audioContext.createBufferSource();
+        noiseFilter = audioContext.createBiquadFilter();
+        mainRotorGain = audioContext.createGain();
+        tailRotorGain = audioContext.createGain();
+        noiseGain = audioContext.createGain();
+
+        mainRotorOsc.type = 'sine';
+        mainRotorOsc.frequency.setValueAtTime(10, audioContext.currentTime);
+
+        tailRotorOsc.type = 'sine';
+        tailRotorOsc.frequency.setValueAtTime(50, audioContext.currentTime);
+
+        noiseSource.buffer = createNoiseBuffer(audioContext, 2);
+        noiseFilter.type = 'lowpass';
+        noiseFilter.frequency.setValueAtTime(2000, audioContext.currentTime);
+        noiseFilter.Q.setValueAtTime(1, audioContext.currentTime);
+
+        mainRotorGain.gain.setValueAtTime(5, audioContext.currentTime);
+        tailRotorGain.gain.setValueAtTime(1, audioContext.currentTime);
+        noiseGain.gain.setValueAtTime(0.1, audioContext.currentTime);
+
+        mainRotorOsc.connect(mainRotorGain);
+        tailRotorOsc.connect(tailRotorGain);
+        noiseSource.connect(noiseFilter);
+        noiseFilter.connect(noiseGain);
+
+        mainRotorGain.connect(audioContext.destination);
+        tailRotorGain.connect(audioContext.destination);
+        noiseGain.connect(audioContext.destination);
+
+        mainRotorOsc.start(audioContext.currentTime);
+        tailRotorOsc.start(audioContext.currentTime);
+        noiseSource.loop = true;
+        noiseSource.start(audioContext.currentTime);
+      } else {
+        isPlaying = false;
+
+        mainRotorOsc.stop(audioContext.currentTime);
+        tailRotorOsc.stop(audioContext.currentTime);
+        mainRotorOsc.disconnect(mainRotorGain);
+        tailRotorOsc.disconnect(tailRotorGain);
+        noiseGain.disconnect(audioContext.destination);
+      }
+    }
+
+    function createNoiseBuffer(context, duration) {
+      const bufferSize = context.sampleRate * duration;
+      const buffer = context.createBuffer(1, bufferSize, context.sampleRate);
+      const output = buffer.getChannelData(0);
+
+      for (let i = 0; i < bufferSize; i++) {
+        output[i] = Math.random() * 2 - 1;
+      }
+
+      return buffer;
+    }
+
+    button.addEventListener('click', createHelicopterSound);
+  </script>
+</body>
+</html>
