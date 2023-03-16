@@ -15,23 +15,39 @@
   <button id="playHelicopter" class="px-6 py-3 bg-blue-500 text-white text-xl font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75">
     Miky McPhantom
   </button>
-  <audio id="helicopterAudio" src="helicopter.mp3"></audio>
 
   <script>
     const button = document.getElementById('playHelicopter');
-    const audio = document.getElementById('helicopterAudio');
+    let audioContext;
+    let bufferSource;
     let isPlaying = false;
 
-    button.addEventListener('click', () => {
+    async function loadAudioFile() {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const response = await fetch('helicopter.mp3');
+      const audioData = await response.arrayBuffer();
+      const buffer = await audioContext.decodeAudioData(audioData);
+      return buffer;
+    }
+
+    async function playHelicopterSound() {
       if (!isPlaying) {
-        audio.play();
         isPlaying = true;
+        const buffer = await loadAudioFile();
+        bufferSource = audioContext.createBufferSource();
+        bufferSource.buffer = buffer;
+        bufferSource.connect(audioContext.destination);
+        bufferSource.start(audioContext.currentTime);
+        bufferSource.onended = () => {
+          isPlaying = false;
+        };
       } else {
-        audio.pause();
-        audio.currentTime = 0;
         isPlaying = false;
+        bufferSource.stop(audioContext.currentTime);
       }
-    });
+    }
+
+    button.addEventListener('click', playHelicopterSound);
   </script>
 </body>
 </html>
